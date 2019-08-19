@@ -1,5 +1,7 @@
 config:
   target: 'http://ec2-34-209-166-136.us-west-2.compute.amazonaws.com:1323'
+  plugins:
+    expect: {}
   processor: "../processors/random_data.js"
   phases:
     - duration: 30
@@ -12,9 +14,32 @@ scenarios:
         json:
             email: "{{ email }}"
         capture:
-            json: "$.id"
-            as: "USER_ID"
+            - json: "$.id"
+              as: "USER_ID"
+            - json: "$.email"
+              as: "USER_EMAIL"
+        expect:
+            - statusCode: 201
+            - contentType: json
+            - hasProperty: id
+            - equals:
+              - "{{ USER_EMAIL }}"
+              - "{{ email }}"
     # - log: "Sent a request to /users/create with {{ email }}"
     - get:
         url: "/user/{{ USER_ID }}"
-    # - log: "Sent a request to /users/{USER_ID} with {{ USER_ID }}"
+        capture:
+            - json: "$.id"
+              as: "GET_USER_ID"
+            - json: "$.email"
+              as: "GET_USER_EMAIL"
+        expect:
+            - statusCode: 200
+            - contentType: json
+            - equals:
+              - "{{ GET_USER_ID }}"
+              - "{{ USER_ID }}"
+            - equals:
+              - "{{ GET_USER_EMAIL }}"
+              - "{{ email }}"
+    # - log: "Sent a request to /users/{GET_USER_ID} with {{ GET_USER_ID }}"

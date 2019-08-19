@@ -1,5 +1,7 @@
 config:
   target: 'http://ec2-34-209-166-136.us-west-2.compute.amazonaws.com:1323'
+  plugins:
+    expect: {}
   processor: "../processors/random_data.js"
   phases:
     - duration: 30
@@ -12,8 +14,17 @@ scenarios:
         json:
             email: "{{ email }}"
         capture:
-            json: "$.id"
-            as: "USER_ID"
+            - json: "$.id"
+              as: "USER_ID"
+            - json: "$.email"
+              as: "USER_EMAIL"
+        expect:
+            - statusCode: 201
+            - contentType: json
+            - hasProperty: id
+            - equals:
+              - "{{ USER_EMAIL }}"
+              - "{{ email }}"
     # - log: "Sent a request to /users/create with {{ email }}"
     - function: "generateFilename"
     - function: "getFileData"
@@ -24,9 +35,48 @@ scenarios:
             name: "{{ filename }}"
             bytes: "{{ file_bytes }}"
         capture:
-            json: "$.hash"
-            as: "FILE_HASH"
+            - json: "$.user_id"
+              as: "FILE_CREATE_USER_ID"
+            - json: "$.name"
+              as: "FILE_CREATE_NAME"
+            - json: "$.hash"
+              as: "FILE_HASH"
+        expect:
+            - statusCode: 201
+            - contentType: json
+            - hasProperty: id
+            - equals:
+              - "{{ FILE_CREATE_USER_ID }}"
+              - "{{ USER_ID }}"
+            - equals:
+              - "{{ FILE_CREATE_NAME }}"
+              - "{{ filename }}"
     # - log: "Sent a request to /user/{USER_ID}/file/create with {{ USER_ID }}"
     - get:
         url: "/user/{{ USER_ID }}/file/{{ FILE_HASH }}"
     # - log: "Sent a request to /user/{USER_ID}/file/{FILE_HASH} with {{ USER_ID }}, {{FILE_HASH}}"
+        capture:
+            - json: "$.user_id"
+              as: "FILE_GET_USER_ID"
+            - json: "$.name"
+              as: "FILE_GET_NAME"
+            - json: "$.hash"
+              as: "FILE_GET_HASH"
+            - json: "$.bytes"
+              as: "FILE_GET_BYTES"
+        expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: id
+            - equals:
+              - "{{ FILE_GET_USER_ID }}"
+              - "{{ USER_ID }}"
+            - equals:
+              - "{{ FILE_GET_NAME }}"
+              - "{{ filename }}"
+            - equals:
+              - "{{ FILE_GET_HASH }}"
+              - "{{ FILE_HASH }}"
+            - equals:
+              - "{{ FILE_GET_BYTES }}"
+              - "{{ file_bytes }}"
