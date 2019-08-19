@@ -1,6 +1,6 @@
 config:
   target: 'http://ec2-34-209-166-136.us-west-2.compute.amazonaws.com:1323'
-  processor: "./random_data.js"
+  processor: "../processors/random_data.js"
   phases:
     - duration: 30
       arrivalRate: 1
