@@ -1,0 +1,20 @@
+config:
+  target: 'http://ec2-34-209-166-136.us-west-2.compute.amazonaws.com:1323'
+  processor: "./random_data.js"
+  phases:
+    - duration: 30
+      arrivalRate: 1
+scenarios:
+  - flow:
+    - function: "generateEmail"
+    - post:
+        url: "/user/create"
+        json:
+            email: "{{ email }}"
+        capture:
+            json: "$.id"
+            as: "USER_ID"
+    # - log: "Sent a request to /users/create with {{ email }}"
+    - get:
+        url: "/user/{{ USER_ID }}"
+    # - log: "Sent a request to /users/{USER_ID} with {{ USER_ID }}"

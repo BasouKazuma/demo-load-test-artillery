@@ -1,0 +1,9 @@
+config:
+  target: 'http://ec2-34-209-166-136.us-west-2.compute.amazonaws.com:1323'
+  phases:
+    - duration: 30
+      arrivalRate: 30
+scenarios:
+  - flow:
+    - get:
+        url: "/"

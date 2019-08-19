@@ -1,0 +1,32 @@
+config:
+  target: 'http://ec2-34-209-166-136.us-west-2.compute.amazonaws.com:1323'
+  processor: "./random_data.js"
+  phases:
+    - duration: 30
+      arrivalRate: 1
+scenarios:
+  - flow:
+    - function: "generateEmail"
+    - post:
+        url: "/user/create"
+        json:
+            email: "{{ email }}"
+        capture:
+            json: "$.id"
+            as: "USER_ID"
+    # - log: "Sent a request to /users/create with {{ email }}"
+    - function: "generateFilename"
+    - function: "getFileData"
+    - post:
+        url: "/user/{{ USER_ID }}/file/create"
+        json:
+            user_id: "{{ USER_ID }}"
+            name: "{{ filename }}"
+            bytes: "{{ file_bytes }}"
+        capture:
+            json: "$.hash"
+            as: "FILE_HASH"
+    # - log: "Sent a request to /user/{USER_ID}/file/create with {{ USER_ID }}"
+    - get:
+        url: "/user/{{ USER_ID }}/file/{{ FILE_HASH }}"
+    # - log: "Sent a request to /user/{USER_ID}/file/{FILE_HASH} with {{ USER_ID }}, {{FILE_HASH}}"
