@@ -1,8 +1,6 @@
 
 # Load Testing Demo using Artillery.io
 
-These tests are written in Node.js using Webdriver.io and Appium
-
 Uses a sample API defined here:
 
 https://documenter.getpostman.com/view/8371151/SVYrseFN?version=latest
